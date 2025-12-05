@@ -37,7 +37,7 @@ export default function LessonView({ course, lesson, currentModuleId }: LessonVi
 
     // Code execution state
     const [language, setLanguage] = useState<Language>(lesson.language || "javascript");
-    const [code, setCode] = useState(lesson.initialCode || "// Write your code here\nconsole.log('Hello, World!');");
+    const [code, setCode] = useState(lesson.initialCode || "console.log('Hello, World!');");
     const [output, setOutput] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
@@ -102,7 +102,7 @@ export default function LessonView({ course, lesson, currentModuleId }: LessonVi
     };
 
     return (
-        <div className="flex h-[calc(100vh-48px)] bg-[#F5F5F5] text-gray-900 overflow-hidden">
+        <div className="relative flex h-[calc(100vh-48px)] bg-[#F5F5F5] text-gray-900 overflow-hidden">
             {/* Sidebar - Table of Contents */}
             <aside
                 className={`${isSidebarOpen ? "w-64" : "w-0"
@@ -153,22 +153,23 @@ export default function LessonView({ course, lesson, currentModuleId }: LessonVi
                 </div>
             </aside>
 
-            {/* Toggle Sidebar Button */}
-            {!isSidebarOpen && (
-                <button
-                    onClick={toggleSidebar}
-                    className="absolute top-4 left-4 z-20 p-2 bg-white border border-gray-300 rounded text-gray-600 hover:text-gray-900 shadow-sm"
-                >
-                    <Menu size={18} />
-                </button>
-            )}
+
 
             {/* Main Panel Group */}
             <PanelGroup direction="horizontal" className="flex-1">
                 {/* Left Panel - Description */}
                 <Panel defaultSize={35} minSize={20} className="flex flex-col bg-white">
                     <div className="border-b border-gray-300 bg-white shadow-sm">
-                        <div className="flex items-center gap-4 px-4 h-10">
+                        <div className="flex items-center px-4 h-10">
+                            {!isSidebarOpen && (
+                                <button
+                                    onClick={toggleSidebar}
+                                    className="mr-3 p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                                    title="Open Sidebar"
+                                >
+                                    <Menu size={18} />
+                                </button>
+                            )}
                             <button
                                 onClick={() => setActiveTab("description")}
                                 className={`text-sm font-medium transition-colors pb-2 border-b-2 ${activeTab === "description"
