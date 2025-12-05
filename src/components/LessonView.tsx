@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
     ChevronDown,
@@ -17,10 +17,9 @@ import { Course, Lesson } from "@/data/mockData";
 import CodeEditor from "./CodeEditor";
 import OutputPanel from "./OutputPanel";
 import SandpackPreviewClient from "./SandpackPreview";
-import { executeCode } from "@/lib/judge0";
+import { runPythonCode } from "@/lib/pyodide";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import ReactMarkdown from "react-markdown";
-import confetti from "canvas-confetti";
 
 interface LessonViewProps {
     course: Course;
@@ -41,6 +40,13 @@ export default function LessonView({ course, lesson, currentModuleId }: LessonVi
     const [output, setOutput] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+
+    useEffect(() => {
+        setLanguage(lesson.language || "javascript");
+        setCode(lesson.initialCode || "console.log('Hello, World!');");
+        setOutput(null);
+        setStatus("idle");
+    }, [lesson]);
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
     const toggleModule = (moduleId: string) => {
@@ -72,25 +78,18 @@ export default function LessonView({ course, lesson, currentModuleId }: LessonVi
                 const result = logs.length > 0 ? logs.join("\n") : "Code executed successfully (no output).";
                 setOutput(result);
                 setStatus("success");
-                confetti({
-                    particleCount: 100,
-                    spread: 70,
-                    origin: { y: 0.6 }
-                });
 
             } else if (language === "python") {
-                const result = await executeCode("python", code);
+                // Show loading message for Pyodide initialization
+                setOutput("⏳ Initializing Python environment (first run may take ~10 seconds)...");
+
+                const result = await runPythonCode(code);
                 if (result.stderr) {
                     setOutput(`Error: ${result.stderr}`);
                     setStatus("error");
                 } else {
                     setOutput(result.stdout || "No output");
                     setStatus("success");
-                    confetti({
-                        particleCount: 100,
-                        spread: 70,
-                        origin: { y: 0.6 }
-                    });
                 }
             }
         } catch (error: any) {
@@ -255,7 +254,8 @@ export default function LessonView({ course, lesson, currentModuleId }: LessonVi
                             </div>
                             <div className="flex-1 overflow-hidden">
                                 <CodeEditor
-                                    initialValue={code}
+                                    initialValue={lesson.initialCode || "console.log('Hello, World!');"}
+                                    value={code}
                                     language={language === "react" ? "javascript" : language}
                                     onChange={(value) => setCode(value || "")}
                                 />

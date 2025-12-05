@@ -5,6 +5,7 @@ import Editor, { OnMount } from "@monaco-editor/react";
 
 interface CodeEditorProps {
   initialValue?: string;
+  value?: string;
   language?: string;
   onChange?: (value: string | undefined) => void;
   theme?: "vs-dark" | "light";
@@ -12,6 +13,7 @@ interface CodeEditorProps {
 
 const CodeEditor: React.FC<CodeEditorProps> = ({
   initialValue = "// Start coding here...",
+  value,
   language = "javascript",
   onChange,
   theme = "vs-dark",
@@ -34,6 +36,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         height="100%"
         defaultLanguage={language}
         defaultValue={initialValue}
+        value={value}
         theme={theme}
         onChange={onChange}
         onMount={handleEditorDidMount}
